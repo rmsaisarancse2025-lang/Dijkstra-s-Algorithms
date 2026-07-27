@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dijkstra's Algorithm</title>
+
+<style>
+body{
+    font-family:Arial, sans-serif;
+    background:#f2f2f2;
+    padding:20px;
+}
+
+.container{
+    max-width:800px;
+    margin:auto;
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 0 10px gray;
+}
+
+textarea,input{
+    width:100%;
+    padding:10px;
+    margin:10px 0;
+    font-size:16px;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    background:#007BFF;
+    color:white;
+    border:none;
+    font-size:18px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#0056b3;
+}
+
+table{
+    width:100%;
+    margin-top:20px;
+    border-collapse:collapse;
+}
+
+table,th,td{
+    border:1px solid black;
+}
+
+th{
+    background:#007BFF;
+    color:white;
+}
+
+th,td{
+    padding:10px;
+    text-align:center;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>Dijkstra's Single Source Shortest Path Algorithm</h2>
+
+<label><b>Number of Vertices</b></label>
+<input type="number" id="vertices" value="5">
+
+<label><b>Source Vertex</b></label>
+<input type="number" id="source" value="0">
+
+<label><b>Enter Edges (source destination weight)</b></label>
+
+<textarea id="edges">
+0 1 4
+0 2 1
+2 1 2
+1 3 1
+2 3 5
+3 4 3
+</textarea>
+
+<button onclick="runDijkstra()">Find Shortest Paths</button>
+
+<table id="result">
+<tr>
+<th>Vertex</th>
+<th>Shortest Distance</th>
+</tr>
+</table>
+
+</div>
+
+<script>
+
+function dijkstra(vertices, edges, source){
+
+    let graph=[];
+
+    for(let i=0;i<vertices;i++)
+        graph.push([]);
+
+    for(let edge of edges){
+
+        let [u,v,w]=edge;
+
+        graph[u].push([v,w]);
+        graph[v].push([u,w]); // Remove for directed graph
+    }
+
+    let dist=new Array(vertices).fill(Infinity);
+    let visited=new Array(vertices).fill(false);
+
+    dist[source]=0;
+
+    for(let count=0;count<vertices-1;count++){
+
+        let u=-1;
+        let min=Infinity;
+
+        for(let i=0;i<vertices;i++){
+
+            if(!visited[i] && dist[i]<min){
+                min=dist[i];
+                u=i;
+            }
+
+        }
+
+        if(u==-1) break;
+
+        visited[u]=true;
+
+        for(let neighbor of graph[u]){
+
+            let [v,w]=neighbor;
+
+            if(!visited[v] && dist[u]+w<dist[v]){
+
+                dist[v]=dist[u]+w;
+
+            }
+
+        }
+
+    }
+
+    return dist;
+
+}
+
+function runDijkstra(){
+
+    let vertices=parseInt(document.getElementById("vertices").value);
+
+    let source=parseInt(document.getElementById("source").value);
+
+    let lines=document.getElementById("edges").value.trim().split("\n");
+
+    let edges=[];
+
+    for(let line of lines){
+
+        let parts=line.trim().split(/\s+/).map(Number);
+
+        if(parts.length==3)
+            edges.push(parts);
+
+    }
+
+    let start=performance.now();
+
+    let distance=dijkstra(vertices,edges,source);
+
+    let end=performance.now();
+
+    let table=document.getElementById("result");
+
+    while(table.rows.length>1)
+        table.deleteRow(1);
+
+    for(let i=0;i<distance.length;i++){
+
+        let row=table.insertRow();
+
+        row.insertCell(0).innerHTML=i;
+        row.insertCell(1).innerHTML=distance[i];
+
+    }
+
+    let row=table.insertRow();
+
+    row.insertCell(0).innerHTML="<b>Execution Time</b>";
+    row.insertCell(1).innerHTML="<b>"+(end-start).toFixed(4)+" ms</b>";
+
+}
+
+</script>
+
+</body>
+</html>
